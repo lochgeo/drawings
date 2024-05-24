@@ -1,0 +1,30 @@
+@startuml
+skinparam componentStyle uml2
+
+package "Post-Delivery Handling" {
+    component "Retry Queue" as retryQueue
+    component "Retry Manager" as retryManager
+    component "Dead Letter Queue (DLQ)" as dlq
+    component "Notification & Alerting" as notification
+    component "Manual Intervention" as manualIntervention
+    component "Automated Resolution" as automatedResolution
+    component "Monitoring & Reporting" as monitoring
+    component "Failure Analysis" as failureAnalysis
+}
+
+retryQueue --> retryManager
+retryManager ..> dlq
+
+dlq --> notification
+dlq --> manualIntervention
+dlq --> automatedResolution
+
+notification ..> monitoring
+manualIntervention ..> monitoring
+automatedResolution ..> monitoring
+
+monitoring ..> failureAnalysis
+
+failureAnalysis ..> retryManager
+failureAnalysis ..> automatedResolution
+@enduml
