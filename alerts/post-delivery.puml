@@ -1,0 +1,48 @@
+@startuml
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam sequenceParticipantFontName Arial
+
+participant "Delivery Layer" as DL
+participant "Failure Detector" as FD
+participant "Failure Repository" as FR
+participant "Retry Scheduler" as RS
+participant "Alerting System" as AS
+participant "Dead Letter Queue" as DLQ
+participant "Manual Handling" as MH
+
+DL -> FD: Message Delivery Failure
+FD -> FR: Store Failure Info (Message ID, Reason, Retry Count)
+FR -> RS: Schedule Retry (Message ID, Retry Count)
+RS -> DL: Retry Message Delivery
+DL -> FR: Update Retry Count (Message ID)
+FR -> DLQ: Move to Dead Letter Queue (Message ID)
+
+DLQ -> MH: Manual Handling (Message ID)
+DLQ -> AS: Alert on Failure (Message ID)
+
+note left of FD
+  Monitors delivery layer for failures
+end note
+
+note left of FR
+  Stores failure info for retries
+end note
+
+note left of RS
+  Schedules retries based on retry policy
+end note
+
+note left of AS
+  Sends notifications on failure
+end note
+
+note left of DLQ
+  Stores messages that failed multiple retries
+end note
+
+note left of MH
+  Manual handling of messages from Dead Letter Queue
+end note
+
+@enduml
